@@ -220,6 +220,7 @@ function setCustomThemeVars(customTheme: CustomTheme): void {
         const { fonts } = customTheme;
         if (fonts.faces) {
             const css = generateCustomFontFaceCSS(fonts.faces);
+            console.log(css);
             const style = document.createElement("style");
             style.setAttribute("title", "custom-theme-font-faces");
             style.setAttribute("type", "text/css");

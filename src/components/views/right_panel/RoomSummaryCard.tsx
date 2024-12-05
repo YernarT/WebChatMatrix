@@ -385,7 +385,7 @@ const RoomSummaryCard: React.FC<IProps> = ({
                 <Separator />
 
                 <MenuItem Icon={UserProfileIcon} label={_t("common|people")} onSelect={onRoomMembersClick} />
-                <MenuItem Icon={ThreadsIcon} label={_t("common|threads")} onSelect={onRoomThreadsClick} />
+                {/* <MenuItem Icon={ThreadsIcon} label={_t("common|threads")} onSelect={onRoomThreadsClick} /> */}
                 {!isVideoRoom && (
                     <>
                         <ReleaseAnnouncement
@@ -408,11 +408,11 @@ const RoomSummaryCard: React.FC<IProps> = ({
                             </div>
                         </ReleaseAnnouncement>
                         <MenuItem Icon={FilesIcon} label={_t("right_panel|files_button")} onSelect={onRoomFilesClick} />
-                        <MenuItem
+                        {/* <MenuItem
                             Icon={ExtensionsIcon}
                             label={_t("right_panel|extensions_button")}
                             onSelect={onRoomExtensionsClick}
-                        />
+                        /> */}
                     </>
                 )}
 

@@ -41,7 +41,21 @@ export const useUserDirectory = (): {
 
             try {
                 setLoading(true);
-                const { results } = await MatrixClientPeg.safeGet().searchUserDirectory(opts);
+                // const { results } = await MatrixClientPeg.safeGet().searchUserDirectory(opts);
+                const response = await fetch(`https://pgo.roomimo.com/api/v1/gp-matrix/user-search/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ limit, search_term: term }),
+                });
+                const { results } = (await response.json()) as {
+                    results: {
+                        user_id: string;
+                        display_name?: string;
+                        avatar_url?: string;
+                    }[];
+                };
                 updateResult(
                     opts,
                     results.map((user) => new DirectoryMember(user)),

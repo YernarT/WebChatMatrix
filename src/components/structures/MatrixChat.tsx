@@ -351,7 +351,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         if (delegatedAuthSucceeded) {
             // token auth/OIDC worked! Time to fire up the client.
             this.tokenLogin = true;
-
+            console.log("delegatedAuthSucceeded");
             // Create and start the client
             // accesses the new credentials just set in storage during attemptDelegatedAuthLogin
             // and sets logged in state
@@ -367,11 +367,33 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         if (restoreSuccess) {
             return;
         }
+        this.autoAuthenticateWithToken();
 
         // If the first screen is an auth screen, we don't want to wait for login.
         if (firstScreen !== null && AUTH_SCREENS.includes(firstScreen)) {
             this.showScreenAfterLogin();
         }
+    }
+
+    private async autoAuthenticateWithToken(): Promise<void> {
+        console.log("autoAuthenticateWithToken");
+        const { hsUrl, isUrl } = this.getServerProperties().serverConfig;
+        // this.stores.accountPasswordStore.setPassword(
+        //     "MIIBWwYJKoZIhvcNAQcDoIIBTDCCAUgCAQAxggESMIIBDgIBADBWMDIxEDAOBgNVBAMTB1RFU1QgQ0ExETAPBgNVBAoTCFRFU1QgT1JHMQswCQYDVQQGEwJLWgIgarxT0WCs83u5V3Lp+UZeA/cYDb/9jX0k3Eh4sxOtuVowDgYKKwYBBAG1EQEDBAUABIGgAQIAACBmBAAgoAAAMIGRAgEEBAh87zQiPs/K5ARAc8HdZXFHbbBCRk67B831KsN63NDu+21cUsTrIDD8URd7WHKA2FgZ169aAjOD9fWnxUrOPXjnsghKnjXlrkHmSARAcU2Ad/0Pcg/AJM2BYA3kovIQn0XrlOBvBBjTkTPY3+wFyG96gj4bku+4CQiLgatzKxQ+q2/oOP+Y5YEPvuKZdDAtBgkqhkiG9w0BBwEwFgYKKwYBBAG1EQEUAQQIfO80Ij7PyuSACHs46C+PUXa4",
+        // );
+
+        const creds: IMatrixClientCreds = {
+            homeserverUrl: hsUrl,
+            identityServerUrl: isUrl,
+            userId: "@user_7170104:user",
+            deviceId: "KUAZYOEMGD",
+            accessToken: "syt_dXNlcl83MTcwMTA0_qqvqXGmeDXKBCclhfqcu_3zzcdp",
+        };
+        await Lifecycle.setLoggedIn(creds);
+        await this.postLoginSetup();
+
+        PerformanceMonitor.instance.stop(PerformanceEntryNames.LOGIN);
+        PerformanceMonitor.instance.stop(PerformanceEntryNames.REGISTER);
     }
 
     private async onSessionLockStolen(): Promise<void> {
@@ -397,7 +419,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         let crossSigningIsSetUp = false;
         if (cryptoEnabled) {
             // check if the user has previously published public cross-signing keys,
-            // as a proxy to figure out if it's worth prompting the user to verify
+            // as a proxy to figure out if it's worth prompting the ugetCryptoser to verify
             // from another device.
             promisesList.push(
                 (async (): Promise<void> => {

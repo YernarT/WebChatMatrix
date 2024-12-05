@@ -354,7 +354,7 @@ export default function RoomHeader({
 
                     {showChatButton && <VideoRoomChatButton room={room} />}
 
-                    <Tooltip label={_t("common|threads")}>
+                    {/* <Tooltip label={_t("common|threads")}>
                         <IconButton
                             indicator={notificationLevelToIndicator(threadNotifications)}
                             onClick={(evt) => {
@@ -366,7 +366,7 @@ export default function RoomHeader({
                         >
                             <ThreadsIcon />
                         </IconButton>
-                    </Tooltip>
+                    </Tooltip> */}
                     {notificationsEnabled && (
                         <Tooltip label={_t("notifications|enable_prompt_toast_title")}>
                             <IconButton
