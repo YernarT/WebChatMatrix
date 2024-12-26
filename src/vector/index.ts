@@ -111,7 +111,7 @@ async function start(): Promise<void> {
         loadApp,
         loadModules,
         showError,
-        showIncompatibleBrowser,
+        // showIncompatibleBrowser,
         _t,
         extractErrorMessageFromError,
     } = await import(
@@ -176,19 +176,19 @@ async function start(): Promise<void> {
         // ##########################
         // error handling begins here
         // ##########################
-        if (!acceptBrowser) {
-            await new Promise<void>((resolve, reject) => {
-                logger.error("Browser is missing required features.");
-                // take to a different landing page to AWOOOOOGA at the user
-                showIncompatibleBrowser(() => {
-                    if (window.localStorage) {
-                        window.localStorage.setItem("mx_accepts_unsupported_browser", String(true));
-                    }
-                    logger.log("User accepts the compatibility risks.");
-                    resolve();
-                }).catch(reject);
-            });
-        }
+        // if (!acceptBrowser) {
+        //     await new Promise<void>((resolve, reject) => {
+        //         logger.error("Browser is missing required features.");
+        //         // take to a different landing page to AWOOOOOGA at the user
+        //         showIncompatibleBrowser(() => {
+        //             if (window.localStorage) {
+        //                 window.localStorage.setItem("mx_accepts_unsupported_browser", String(true));
+        //             }
+        //             logger.log("User accepts the compatibility risks.");
+        //             resolve();
+        //         }).catch(reject);
+        //     });
+        // }
 
         try {
             // await config here
