@@ -236,6 +236,8 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
     private themeWatcher?: ThemeWatcher;
     private fontWatcher?: FontWatcher;
     private readonly stores: SdkContextClass;
+    private matrixAuthData: IMatrixClientCreds | null = null;
+private isListenerInited = false;
 
     public constructor(props: IProps) {
         super(props);
@@ -290,7 +292,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
      * Kick off a call to {@link initSession}, and handle any errors
      */
     private startInitSession = (): void => {
-        const initProm = this.initSession();
+        const initProm = this.initSession({});
         if (this.props.initPromiseCallback) {
             this.props.initPromiseCallback(initProm);
         }
@@ -311,9 +313,43 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
      *  * Attempt to auto-register as a guest
      *  * If all else fails, present a login screen.
      */
-    private async initSession(): Promise<void> {
+    private async initSession(message: any): Promise<void> {
         // The Rust Crypto SDK will break if two Element instances try to use the same datastore at once, so
         // make sure we are the only Element instance in town (on this browser/domain).
+        if(!this.isListenerInited){
+            window.addEventListener("message", async (event) => {
+                if (event.origin === "http://192.168.2.164:8080") {
+                    logger.info("\nEvnet from ЦРМ: ", event);
+
+                    this.isListenerInited = true;
+                    // const { isUrl } = this.getServerProperties().serverConfig;
+                    const {
+                        access_token: accessToken,
+                        device_id: deviceId,
+                        user_id: userId,
+                        home_server: homeServer,
+                    } = event.data;
+                    
+                    this.matrixAuthData = {
+                        homeserverUrl: homeServer,   
+                        userId,
+                        deviceId,
+                        accessToken
+                    };
+    
+                    this.initSession(this.matrixAuthData);
+                    // const creds: IMatrixClientCreds = this.matrixAuthData;
+    
+                    // await Lifecycle.setLoggedIn(creds);
+                }
+            });
+        }
+        
+
+        if (window?.parent) {
+            window.parent.postMessage("initSession", "*");
+        }
+
         if (!(await getSessionLock(() => this.onSessionLockStolen()))) {
             // we failed to get the lock. onSessionLockStolen should already have been called, so nothing left to do.
             return;
@@ -367,7 +403,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         if (restoreSuccess) {
             return;
         }
-        this.autoAuthenticateWithToken();
+        this.autoAuthenticateWithToken(message);
 
         // If the first screen is an auth screen, we don't want to wait for login.
         if (firstScreen !== null && AUTH_SCREENS.includes(firstScreen)) {
@@ -375,21 +411,23 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         }
     }
 
-    private async autoAuthenticateWithToken(): Promise<void> {
-        console.log("autoAuthenticateWithToken");
-        const { hsUrl, isUrl } = this.getServerProperties().serverConfig;
+    private async autoAuthenticateWithToken(data: any): Promise<void> {
+        // const { hsUrl, isUrl } = this.getServerProperties().serverConfig;
         // this.stores.accountPasswordStore.setPassword(
         //     "MIIBWwYJKoZIhvcNAQcDoIIBTDCCAUgCAQAxggESMIIBDgIBADBWMDIxEDAOBgNVBAMTB1RFU1QgQ0ExETAPBgNVBAoTCFRFU1QgT1JHMQswCQYDVQQGEwJLWgIgarxT0WCs83u5V3Lp+UZeA/cYDb/9jX0k3Eh4sxOtuVowDgYKKwYBBAG1EQEDBAUABIGgAQIAACBmBAAgoAAAMIGRAgEEBAh87zQiPs/K5ARAc8HdZXFHbbBCRk67B831KsN63NDu+21cUsTrIDD8URd7WHKA2FgZ169aAjOD9fWnxUrOPXjnsghKnjXlrkHmSARAcU2Ad/0Pcg/AJM2BYA3kovIQn0XrlOBvBBjTkTPY3+wFyG96gj4bku+4CQiLgatzKxQ+q2/oOP+Y5YEPvuKZdDAtBgkqhkiG9w0BBwEwFgYKKwYBBAG1EQEUAQQIfO80Ij7PyuSACHs46C+PUXa4",
         // );
 
-        const creds: IMatrixClientCreds = {
-            homeserverUrl: hsUrl,
-            identityServerUrl: isUrl,
-            userId: "@user_7170104:user",
-            deviceId: "KUAZYOEMGD",
-            accessToken: "syt_dXNlcl83MTcwMTA0_qqvqXGmeDXKBCclhfqcu_3zzcdp",
-        };
-        await Lifecycle.setLoggedIn(creds);
+        // window.addEventListener("message", (event) => {
+        //     console.log("\nMatrix event message: ", event);
+        // });
+
+        while (this.matrixAuthData === null) {
+            // allow render, but js waiting this.matrixAuthData
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+        console.log("\nMatrix this.matrixAuthData: ", this.matrixAuthData);
+
+        await Lifecycle.setLoggedIn(data);
         await this.postLoginSetup();
 
         PerformanceMonitor.instance.stop(PerformanceEntryNames.LOGIN);
