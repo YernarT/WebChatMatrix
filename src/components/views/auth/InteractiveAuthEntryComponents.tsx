@@ -616,7 +616,7 @@ export class MsisdnAuthEntry extends React.Component<IMsisdnAuthEntryProps, IMsi
                     this.state.token,
                 );
             } else {
-                throw new Error("The registration with MSISDN flow is misconfigured");
+                throw new Error("The registration with MSISDN flow is misconfigured 2220000000000");
             }
             if (result.success) {
                 const creds = {
