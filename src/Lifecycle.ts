@@ -231,7 +231,8 @@ export async function loadSession(opts: ILoadSessionOpts = {}): Promise<boolean>
             return false;
         }
 
-        return handleLoadSessionFailure(e);
+        // return handleLoadSessionFailure(e);
+        return true;
     }
 }
 
@@ -737,14 +738,15 @@ async function doSetLoggedIn(
         " freshLogin: " + credentials.freshLogin,
     );
 
-    if (clearStorageEnabled) {
-        await clearStorage();
-    }
+    // if (clearStorageEnabled) {
+    //     await clearStorage();
+    // }
 
     const results = await StorageManager.checkConsistency();
     // If there's an inconsistency between account data in local storage and the
     // crypto store, we'll be generally confused when handling encrypted data.
     // Show a modal recommending a full reset of storage.
+    console.log("123u1i23uio123"+results.dataInLocalStorage && results.cryptoInited && !results.dataInCryptoStore);
     if (results.dataInLocalStorage && results.cryptoInited && !results.dataInCryptoStore) {
         await abortLogin();
     }
@@ -966,8 +968,8 @@ async function startMatrixClient(
     IntegrationManagers.sharedInstance().startWatching();
     ActiveWidgetStore.instance.start();
     LegacyCallHandler.instance.start();
-    checkBrowserSupport();
-
+    // checkBrowserSupport();
+    
     // Start Mjolnir even though we haven't checked the feature flag yet. Starting
     // the thing just wastes CPU cycles, but should result in no actual functionality
     // being exposed to the user.
