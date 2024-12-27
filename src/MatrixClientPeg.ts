@@ -285,12 +285,12 @@ class MatrixClientPegClass implements IMatrixClientPeg {
                 }
             }
         }
-        this.matrixClient.store.on?.("closed", this.onUnexpectedStoreClose);
 
+        this.matrixClient.store.on?.("closed", this.onUnexpectedStoreClose);
         // try to initialise e2e on the new client
-        if (!SettingsStore.getValue("lowBandwidth")) {
-            await this.initClientCrypto(assignOpts.rustCryptoStoreKey, assignOpts.rustCryptoStorePassword);
-        }
+        // if (!SettingsStore.getValue("lowBandwidth")) {
+        //     await this.initClientCrypto(assignOpts.rustCryptoStoreKey, assignOpts.rustCryptoStorePassword);
+        // }
 
         const opts = utils.deepCopy(this.opts);
         // the react sdk doesn't work without this, so don't allow
@@ -337,12 +337,19 @@ class MatrixClientPegClass implements IMatrixClientPeg {
         // rolling back to versions of EW that did not default to Rust crypto (which would lead to an error, since
         // we cannot migrate from Rust to Legacy crypto).
         await SettingsStore.setValue(Features.RustCrypto, null, SettingLevel.DEVICE, true);
-
-        await this.matrixClient.initRustCrypto({
-            storageKey: rustCryptoStoreKey,
-            storagePassword: rustCryptoStorePassword,
-        });
-
+        
+        alert('111111 matrixClient.initRustCryptoKET=Y: ');
+        
+        try{
+            await this.matrixClient.initRustCrypto({
+                storageKey: rustCryptoStoreKey,
+                storagePassword: rustCryptoStorePassword,
+            });
+    
+        }
+        catch (error){
+            logger.info('111111 matrixClient.initRustCrypto: ', error);
+        }        
         StorageManager.setCryptoInitialised(true);
 
         setDeviceIsolationMode(this.matrixClient, SettingsStore.getValue("feature_exclude_insecure_devices"));
@@ -355,11 +362,11 @@ class MatrixClientPegClass implements IMatrixClientPeg {
      * Implementation of {@link IMatrixClientPeg.start}.
      */
     public async start(assignOpts?: MatrixClientPegAssignOpts): Promise<void> {
+    
         const opts = await this.assign(assignOpts);
-
+        
         logger.log(`MatrixClientPeg: really starting MatrixClient`);
         await this.matrixClient!.startClient(opts);
-        logger.log(`MatrixClientPeg: MatrixClient started`);
     }
 
     private namesToRoomName(names: string[], count: number): string | undefined {
